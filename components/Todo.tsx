@@ -54,7 +54,7 @@ function Li({
     const userDoc = doc(db, "users", id);
     const newFields = { age: age + 1 };
     await onSnapshot(doc(db, "users", id), (doc) => {
-      let getName = doc.data()!.name;
+      let getName = doc.data()?.name;
       const newUser = {
         id,
         name: getName,
@@ -76,7 +76,7 @@ function Li({
     const newFields = { age: num };
 
     await onSnapshot(doc(db, "users", id), (doc) => {
-      let getName = doc.data()!.name;
+      let getName = doc.data()?.name;
       const newUser = {
         id,
         name: getName,
@@ -107,7 +107,6 @@ function Li({
     const newFields = { name: changedName };
 
     await onSnapshot(doc(db, "users", id), (doc) => {
-      // let getName = doc.data()!.name;
       const newUser = {
         id,
         name: changedName,
@@ -136,6 +135,7 @@ function Li({
     });
     await deleteDoc(userDoc);
   };
+
   return (
     <div className="li" key={user.id}>
       {" "}
