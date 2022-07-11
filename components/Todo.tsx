@@ -9,7 +9,13 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 
-import { useState, useEffect } from "react";
+import {
+  FormEvent,
+  Dispatch,
+  SetStateAction,
+  useState,
+  useEffect,
+} from "react";
 import { db } from "../firebase-config";
 
 type User = {
@@ -19,17 +25,17 @@ type User = {
 };
 
 type UlProps = {
-  users: any;
-  setUsers: any;
+  users: User[];
+  setUsers: Dispatch<SetStateAction<User[]>>;
 };
 
 type LiProps = {
-  user: any;
-  users: any;
+  user: User;
+  users: User[];
   index: number;
-  changedName: any;
-  setChangedName: any;
-  setUsers: any;
+  changedName: string;
+  setChangedName: Dispatch<SetStateAction<string>>;
+  setUsers: Dispatch<SetStateAction<User[]>>;
 };
 
 function Li({
@@ -87,7 +93,12 @@ function Li({
     await updateDoc(userDoc, newFields); //doc 수정시 updateDoc(기존doc, 수정사항 적힌 객체 자료형)
   };
 
-  const updateName = async (e: any, id: string, age: number, index: number) => {
+  const updateName = async (
+    e: FormEvent<HTMLFormElement>,
+    id: string,
+    age: number,
+    index: number
+  ) => {
     //changedName
     e.preventDefault();
     alert(`변경된 이름: ${changedName}`);
@@ -118,15 +129,11 @@ function Li({
   //delete
   const deleteUser = async (id: string) => {
     const userDoc = doc(db, "users", id);
-    console.log("삭제시 유저 닥: ", userDoc);
-
-    users.map((user: any) => {
+    users.map((user: User) => {
       if (user.id === id) {
-        setUsers(users.filter((e: any) => e !== user));
+        setUsers(users.filter((e: User) => e !== user));
       }
     });
-    console.log("삭제후 화면에 보이는 users: ", users);
-
     await deleteDoc(userDoc);
   };
   return (
@@ -155,7 +162,6 @@ function Li({
       <button
         className="button"
         onClick={() => {
-          console.log("온 클릭시 user.id : ", user.id);
           deleteUser(user.id);
         }}
       >
@@ -174,10 +180,8 @@ function Li({
             <input
               type="text"
               onChange={(e) => {
-                console.log(e.target.value);
                 setChangedName(e.target.value);
               }}
-              value={changedName}
               placeholder={user.name}
             />
             <input
@@ -198,7 +202,7 @@ function Ul({ users, setUsers }: UlProps) {
 
   return (
     <ul>
-      {users.map((user: any, index: number) => {
+      {users.map((user: User, index: number) => {
         return (
           <Li
             key={user.id + index}
@@ -256,35 +260,33 @@ const Todo: NextPage = () => {
       getUsers();
     }, []);
     return (
-      <div className="formcase">
-        <input
-          className="button"
-          placeholder="Name..."
-          onChange={(e) => {
-            setNewName(e.target.value);
-          }}
-        />
-        <input
-          className="button"
-          type="number"
-          placeholder="Age..."
-          onChange={(e) => {
-            setNewAge(parseInt(e.target.value));
-          }}
-        />
-        <button className="button" onClick={createUser}>
-          Create User
-        </button>
-        {users ? <Ul users={users} setUsers={setUsers} /> : null}
+      <div className="App bigcase">
+        <div className="formcase">
+          <input
+            className="button"
+            placeholder="Name..."
+            onChange={(e) => {
+              setNewName(e.target.value);
+            }}
+          />
+          <input
+            className="button"
+            type="number"
+            placeholder="Age..."
+            onChange={(e) => {
+              setNewAge(parseInt(e.target.value));
+            }}
+          />
+          <button className="button" onClick={createUser}>
+            Create User
+          </button>
+          {users ? <Ul users={users} setUsers={setUsers} /> : null}
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="App bigcase">
-      <Todo />
-    </div>
-  );
+  return <Todo />;
 };
 
 export default Todo;
