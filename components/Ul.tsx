@@ -2,27 +2,30 @@ import { useState } from "react";
 import Li from "./Li";
 import { UlProps, User } from "./Todo";
 
-
-
-function Ul({users, setUsers}: UlProps) {
-const [changedName, setChangedName] = useState<string>("");
+function Ul({
+  users,
+  deleteUser,
+  updateName,
+  increaseAge,
+  decreaseAge,
+}: UlProps) {
   return (
     <ul>
-    {users.map((user: User, index: number) => {
-      return (
-        <Li
-          key={user.id + index}
-          user={user}
-          index={index}
-          changedName={changedName}
-          setChangedName={setChangedName}
-          users={users}
-          setUsers={setUsers}
-        ></Li>
-      );
-    })}
-  </ul>
-  )
+      {users.map((user: User, index: number) => {
+        return (
+          <Li
+            key={user.id + index}
+            user={user}
+            index={index}
+            deleteUser={deleteUser}
+            updateName={updateName}
+            increaseAge={increaseAge}
+            decreaseAge={decreaseAge}
+          ></Li>
+        );
+      })}
+    </ul>
+  );
 }
 
-export default Ul
+export default Ul;
