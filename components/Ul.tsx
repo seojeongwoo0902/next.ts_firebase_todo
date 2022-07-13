@@ -1,14 +1,29 @@
-import { useState } from "react";
+import React from "react";
+import { Dispatch, SetStateAction } from "react";
 import Li from "./Li";
-import { UlProps, User } from "./Todo";
+import { User } from "./Todo";
 
-function Ul({
+type UlProps = {
+  users: User[];
+  setUsers: Dispatch<SetStateAction<User[]>>;
+  deleteUser: (id: string) => void;
+  updateName: (
+    id: string,
+    changedName: string,
+    age: number,
+    index: number
+  ) => void;
+  increaseAge: (id: string, age: number, index: number) => void;
+  decreaseAge: (id: string, age: number, index: number) => void;
+};
+
+const Ul = ({
   users,
   deleteUser,
   updateName,
   increaseAge,
   decreaseAge,
-}: UlProps) {
+}: UlProps) => {
   return (
     <ul>
       {users.map((user: User, index: number) => {
@@ -26,6 +41,6 @@ function Ul({
       })}
     </ul>
   );
-}
+};
 
-export default Ul;
+export default React.memo(Ul);

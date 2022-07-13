@@ -1,5 +1,20 @@
+import React from "react";
 import { useState } from "react";
-import { LiProps } from "./Todo";
+import { User } from "./Todo";
+
+type LiProps = {
+  user: User;
+  index: number;
+  deleteUser: (id: string) => void;
+  updateName: (
+    id: string,
+    changedName: string,
+    age: number,
+    index: number
+  ) => void;
+  increaseAge: (id: string, age: number, index: number) => void;
+  decreaseAge: (id: string, age: number, index: number) => void;
+};
 
 function Li({
   user,
@@ -51,8 +66,9 @@ function Li({
           }}
         >{`Edit Name`}</button>
 
+        {/* 내일은 폼으로 바꿔보자 */}
         {form ? (
-          <form>
+          <div>
             <input
               type="text"
               onChange={(e) => {
@@ -63,17 +79,18 @@ function Li({
             <input
               onClick={() => {
                 updateName(user.id, changedName, user.age, index);
+                setForm(false);
               }}
               className="inputtext"
               style={{ display: "hidden" }}
               type="submit"
               value="이름변경"
             />
-          </form>
+          </div>
         ) : null}
       </div>
     </li>
   );
 }
 
-export default Li;
+export default React.memo(Li);
