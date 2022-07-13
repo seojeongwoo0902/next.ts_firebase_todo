@@ -26,6 +26,7 @@ function Li({
 }: LiProps) {
   let [form, setForm] = useState<boolean>(false);
   let [changedName, setChangedName] = useState<string>("");
+
   //**********************UPDATE sector********************************
   return (
     <li className="li" key={user.id}>
@@ -68,7 +69,13 @@ function Li({
 
         {/* 내일은 폼으로 바꿔보자 */}
         {form ? (
-          <div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              updateName(user.id, changedName, user.age, index);
+              setForm(false);
+            }}
+          >
             <input
               type="text"
               onChange={(e) => {
@@ -76,17 +83,8 @@ function Li({
               }}
               placeholder={user.name}
             />
-            <input
-              onClick={() => {
-                updateName(user.id, changedName, user.age, index);
-                setForm(false);
-              }}
-              className="inputtext"
-              style={{ display: "hidden" }}
-              type="submit"
-              value="이름변경"
-            />
-          </div>
+            <input className="inputtext" type="submit" value="이름변경" />
+          </form>
         ) : null}
       </div>
     </li>
