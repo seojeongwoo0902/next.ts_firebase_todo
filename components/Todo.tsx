@@ -16,6 +16,7 @@ import {
   useEffect,
   useMemo,
   useCallback,
+  useReducer,
 } from "react";
 import { db } from "../firebase-config";
 import Ul from "./Ul";
@@ -30,8 +31,29 @@ export type User = {
   age: number;
 };
 
+// const initialState = {
+//   inputs: {
+//     name: "",
+//     age: 0,
+//   },
+// };
+
+// function reducer(state: any, action: any) {
+//   switch (action.type) {
+//     case "CHANGE_INPUT":
+//       return {
+//         ...state,
+//         inputs: {
+//           ...state.inputs,
+//           [action.name]: action.value,
+//         },
+//       };
+//   }
+//}
+
 const Todo: NextPage = () => {
   function Todo() {
+    //const [initialState, dispatch] = useReducer(reducer, 0);
     const [users, setUsers] = useState<User[]>([]); //users는 [{id:"",name:"",age:},{},...] 형태의 자료형.
     const [inputs, setInputs] = useState<{ name: string; age: number }>({
       name: "",
@@ -47,10 +69,20 @@ const Todo: NextPage = () => {
           ...inputs,
           [name]: value,
         });
-        console.log(inputs);
       },
       [inputs]
     );
+
+    // const { name, age } = initialState.inputs;
+
+    // const onChange: any = useCallback((e: any) => {
+    //   const { name, value } = e.target;
+    //   dispatch({
+    //     type: "CHANGE_INPUT",
+    //     name,
+    //     value,
+    //   });
+    // }, []);
 
     const usersCollectionRef = collection(db, "users"); //users이름의 콜렉션(자료들을 모아놓은 자료구조)
 
