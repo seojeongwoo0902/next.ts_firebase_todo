@@ -9,7 +9,7 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 
-import {
+import React, {
   Dispatch,
   SetStateAction,
   useState,
@@ -31,58 +31,66 @@ export type User = {
   age: number;
 };
 
-// const initialState = {
-//   inputs: {
-//     name: "",
-//     age: 0,
-//   },
-// };
+const initialState = {
+  inputs: {
+    name: "",
+    age: 0,
+  },
+};
 
-// function reducer(state: any, action: any) {
-//   switch (action.type) {
-//     case "CHANGE_INPUT":
-//       return {
-//         ...state,
-//         inputs: {
-//           ...state.inputs,
-//           [action.name]: action.value,
-//         },
-//       };
-//   }
-//}
+function reducer(state: any, action: any) {
+  switch (action.type) {
+    case "CHANGE_INPUT":
+      return {
+        ...state,
+        inputs: {
+          ...state.inputs,
+          [action.name]: action.value,
+        },
+      };
+  }
+}
+
+type nameAndAge={
+  name:string,
+  age:number,
+}
+
+export const UserDispatch = React.createContext(null);
 
 const Todo: NextPage = () => {
   function Todo() {
-    //const [initialState, dispatch] = useReducer(reducer, 0);
+    const [state, dispatch] = useReducer(reducer, initialState);
     const [users, setUsers] = useState<User[]>([]); //users는 [{id:"",name:"",age:},{},...] 형태의 자료형.
     const [inputs, setInputs] = useState<{ name: string; age: number }>({
       name: "",
       age: 0,
     });
 
-    const { name, age } = inputs;
+    const { name, age }:nameAndAge = state.inputs;
 
-    const onChange: any = useCallback(
-      (e: any) => {
-        const { name, value } = e.target;
-        setInputs({
-          ...inputs,
-          [name]: value,
-        });
-      },
-      [inputs]
-    );
+    // const onChange: any = useCallback(
+    //   (e: any) => {
+    //     const { name, value } = e.target;
+    //     setInputs({
+    //       ...inputs,
+    //       [name]: value,
+    //     });
+    //     console.log(name,":",value, typeof(value))
+    //   },
+    //   [inputs]
+    // );
 
-    // const { name, age } = initialState.inputs;
+    //const { name, age } = initialState.inputs;
 
-    // const onChange: any = useCallback((e: any) => {
-    //   const { name, value } = e.target;
-    //   dispatch({
-    //     type: "CHANGE_INPUT",
-    //     name,
-    //     value,
-    //   });
-    // }, []);
+    const onChange: any = useCallback((e: any) => {
+      const { name, value } = e.target;
+      dispatch({
+        type: "CHANGE_INPUT",
+        name,
+        value,
+      });
+    }, []);
 
     const usersCollectionRef = collection(db, "users"); //users이름의 콜렉션(자료들을 모아놓은 자료구조)
 
@@ -91,7 +99,7 @@ const Todo: NextPage = () => {
     };
 
     //const count = countActiveUsers(users);
-    const count = useMemo(() => countActiveUsers(users), [users]);
+
 
     const createUser = useCallback(async () => {
       const result = await addDoc(usersCollectionRef, {
@@ -102,14 +110,15 @@ const Todo: NextPage = () => {
       const newUser = {
         id: result.id,
         name: name,
-        age: age,
+        age: Number(age),
       };
+      
       //await setUsers((users) => [...users, newUser]); //비동기 함수를 사용하는 이유?
-
-      setInputs({
-        name: "",
-        age: 0,
-      });
+      //state.input({name:"",age:0})
+      // setInputs({
+      //   name: "",
+      //   age: 0,
+      // });
       await setUsers(users.concat(newUser));
     }, [name, age, users, usersCollectionRef]);
 
@@ -132,7 +141,8 @@ const Todo: NextPage = () => {
     const increaseAge = useCallback(
       async (id: string, age: number, index: number) => {
         const userDoc = doc(db, "users", id);
-        const newFields = { age: age + 1 };
+      
+        const newFields = { age: Number(age) + 1 };
         await updateDoc(userDoc, newFields); //doc 수정시 updateDoc(기존doc, 수정사항 적힌 객체 자료형)
 
         await onSnapshot(doc(db, "users", id), (doc) => {
@@ -140,7 +150,7 @@ const Todo: NextPage = () => {
           const newUser = {
             id,
             name: getName,
-            age: age + 1,
+            age: Number(age) + 1,
           };
           setUsers([
             ...users.slice(0, index),
@@ -234,7 +244,7 @@ const Todo: NextPage = () => {
     useEffect(() => {
       getUsers();
     }, []);
-
+    const count = useMemo(() => countActiveUsers(users), [users]);
     return (
       <div className="App bigcase">
         <div className="formcase">

@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useRef}  from "react";
 
 type Props = {
   newName: string;
@@ -8,6 +8,8 @@ type Props = {
 };
 
 const CreateUser = ({ newName, newAge, createUser, onChange }: Props) => {
+
+
   return (
     <>
       <input
