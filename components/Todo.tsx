@@ -10,8 +10,6 @@ import {
 } from "firebase/firestore";
 
 import React, {
-  Dispatch,
-  SetStateAction,
   useState,
   useEffect,
   useMemo,
@@ -37,7 +35,11 @@ const initialState = {
     age: 0,
   },
 };
+function init(initialState: any) {
+  return { inputs: initialState };
+}
 
+const usersCollectionRef = collection(db, "users");
 function reducer(state: any, action: any) {
   switch (action.type) {
     case "CHANGE_INPUT":
@@ -48,43 +50,49 @@ function reducer(state: any, action: any) {
           [action.name]: action.value,
         },
       };
+    case "CREATE_USER":
+      return {};
+    case "reset":
+      return init(action.payload);
+
+    default:
+      throw new Error("Not a type");
   }
 }
 
-type nameAndAge={
-  name:string,
-  age:number,
-}
+type nameAndAge = {
+  name: string;
+  age: number;
+};
 
-export const UserDispatch = React.createContext(null);
+type IncreaseDecreaseAge = {
+  id: string;
+  age: number;
+  index: number;
+};
+
+type UpdatePropsType = {
+  id: string;
+  changedName: string;
+  index: number;
+  age: number;
+};
+
+export const UserDispatch = React.createContext<any | null>(null);
 
 const Todo: NextPage = () => {
   function Todo() {
     const [state, dispatch] = useReducer(reducer, initialState);
     const [users, setUsers] = useState<User[]>([]); //users는 [{id:"",name:"",age:},{},...] 형태의 자료형.
-    const [inputs, setInputs] = useState<{ name: string; age: number }>({
-      name: "",
-      age: 0,
-    });
+    const { name, age }: nameAndAge = state.inputs;
 
-    const { name, age }:nameAndAge = state.inputs;
-
-    // const onChange: any = useCallback(
-    //   (e: any) => {
-    //     const { name, value } = e.target;
-    //     setInputs({
-    //       ...inputs,
-    //       [name]: value,
-    //     });
-    //     console.log(name,":",value, typeof(value))
-    //   },
-    //   [inputs]
-    // );
-
-    //const { name, age } = initialState.inputs;
+    const countActiveUsers = (users: User[]) => {
+      return users.length;
+    };
 
     const onChange: any = useCallback((e: any) => {
       const { name, value } = e.target;
+      //디스패치에 객체로 type, name, value를 보내준다
       dispatch({
         type: "CHANGE_INPUT",
         name,
@@ -92,35 +100,20 @@ const Todo: NextPage = () => {
       });
     }, []);
 
-    const usersCollectionRef = collection(db, "users"); //users이름의 콜렉션(자료들을 모아놓은 자료구조)
-
-    const countActiveUsers = (users: User[]) => {
-      return users.length;
-    };
-
-    //const count = countActiveUsers(users);
-
-
     const createUser = useCallback(async () => {
       const result = await addDoc(usersCollectionRef, {
         name: name,
         age: age,
-      }); //addDoc(저장할 콜렉션, 들어갈 자료형 기입)
+      });
       //result==={converter:null, _key:,firestore:,id,...}등으로 이뤄진 객체
       const newUser = {
         id: result.id,
         name: name,
         age: Number(age),
       };
-      
-      //await setUsers((users) => [...users, newUser]); //비동기 함수를 사용하는 이유?
-      //state.input({name:"",age:0})
-      // setInputs({
-      //   name: "",
-      //   age: 0,
-      // });
+
       await setUsers(users.concat(newUser));
-    }, [name, age, users, usersCollectionRef]);
+    }, [name, age, users]);
 
     const getUsers = async () => {
       const data = await getDocs(usersCollectionRef);
@@ -139,9 +132,9 @@ const Todo: NextPage = () => {
 
     //update-increaseAge(선 서버 데이터 수정, 후 앱 존재 데이터에 수정)
     const increaseAge = useCallback(
-      async (id: string, age: number, index: number) => {
+      async ({ id, age, index }: IncreaseDecreaseAge) => {
         const userDoc = doc(db, "users", id);
-      
+
         const newFields = { age: Number(age) + 1 };
         await updateDoc(userDoc, newFields); //doc 수정시 updateDoc(기존doc, 수정사항 적힌 객체 자료형)
 
@@ -164,7 +157,7 @@ const Todo: NextPage = () => {
 
     //(선 서버 데이터 수정, 후 앱 존재 데이터에 수정)
     const decreaseAge = useCallback(
-      async (id: string, age: number, index: number) => {
+      async ({ id, age, index }: IncreaseDecreaseAge) => {
         const userDoc = doc(db, "users", id);
         let num = age > 0 ? age - 1 : 0;
         const newFields = { age: num };
@@ -191,7 +184,7 @@ const Todo: NextPage = () => {
 
     //(선 서버 데이터 수정, 후 앱 존재 데이터에 수정)
     const updateName = useCallback(
-      async (id: string, changedName: string, age: number, index: number) => {
+      async ({ id, changedName, age, index }: UpdatePropsType) => {
         //changedName
 
         const userDoc = doc(db, "users", id);
@@ -246,32 +239,37 @@ const Todo: NextPage = () => {
     }, []);
     const count = useMemo(() => countActiveUsers(users), [users]);
     return (
-      <div className="App bigcase">
-        <div className="formcase">
-          <div>
-            <h4>총원 : {count}</h4>
+      <UserDispatch.Provider value={dispatch}>
+        <div className="App bigcase">
+          <div className="formcase">
+            <div>
+              <h4>총원 : {count}</h4>
+            </div>
+            <CreateUser
+              name={name}
+              age={age}
+              onChange={onChange}
+              createUser={createUser}
+            ></CreateUser>
+            {/* UL */}
+            {users ? (
+              <Ul
+                users={users}
+                deleteUser={(id) => deleteUser(id)}
+                updateName={(id, changedName, age, index) =>
+                  updateName({ id, changedName, age, index })
+                }
+                increaseAge={(id, age, index) =>
+                  increaseAge({ id, age, index })
+                }
+                decreaseAge={(id, age, index) =>
+                  decreaseAge({ id, age, index })
+                }
+              />
+            ) : null}
           </div>
-          <CreateUser
-            newName={name}
-            newAge={age}
-            onChange={onChange}
-            createUser={createUser}
-          ></CreateUser>
-          {/* UL */}
-          {users ? (
-            <Ul
-              users={users}
-              setUsers={setUsers}
-              deleteUser={(id) => deleteUser(id)}
-              updateName={(id, changedName, age, index) =>
-                updateName(id, changedName, age, index)
-              }
-              increaseAge={(id, age, index) => increaseAge(id, age, index)}
-              decreaseAge={(id, age, index) => decreaseAge(id, age, index)}
-            />
-          ) : null}
         </div>
-      </div>
+      </UserDispatch.Provider>
     );
   }
 
