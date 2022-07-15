@@ -1,11 +1,9 @@
 import React from "react";
-import { Dispatch, SetStateAction } from "react";
 import Li from "./Li";
 import { User } from "./Todo";
 
 type UlProps = {
   users: User[];
-  setUsers: Dispatch<SetStateAction<User[]>>;
   deleteUser: (id: string) => void;
   updateName: (
     id: string,
