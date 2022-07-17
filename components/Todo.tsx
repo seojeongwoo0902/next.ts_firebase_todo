@@ -15,6 +15,7 @@ import React, {
   useMemo,
   useCallback,
   useReducer,
+  createContext,
 } from "react";
 import { db } from "../firebase-config";
 import Ul from "./Ul";
@@ -28,37 +29,6 @@ export type User = {
   name: string;
   age: number;
 };
-
-const initialState = {
-  inputs: {
-    name: "",
-    age: 0,
-  },
-};
-function init(initialState: any) {
-  return { inputs: initialState };
-}
-
-const usersCollectionRef = collection(db, "users");
-function reducer(state: any, action: any) {
-  switch (action.type) {
-    case "CHANGE_INPUT":
-      return {
-        ...state,
-        inputs: {
-          ...state.inputs,
-          [action.name]: action.value,
-        },
-      };
-    case "CREATE_USER":
-      return {};
-    case "reset":
-      return init(action.payload);
-
-    default:
-      throw new Error("Not a type");
-  }
-}
 
 type nameAndAge = {
   name: string;
@@ -77,8 +47,35 @@ type UpdatePropsType = {
   index: number;
   age: number;
 };
+const initialState = {
+  inputs: {
+    name: "",
+    age: 0,
+  },
+};
 
-export const UserDispatch = React.createContext<any | null>(null);
+const usersCollectionRef = collection(db, "users");
+function reducer(state: any, action: any) {
+  switch (action.type) {
+    case "CHANGE_INPUT":
+      return {
+        ...state,
+        inputs: {
+          ...state.inputs,
+          [action.name]: action.value,
+        },
+      };
+    case "GET_USER":
+      return {
+
+      };
+
+    default:
+      throw new Error("Not a type");
+  }
+}
+
+export const UserDispatch = createContext<any | null>(null);
 
 const Todo: NextPage = () => {
   function Todo() {
@@ -100,22 +97,7 @@ const Todo: NextPage = () => {
       });
     }, []);
 
-    const createUser = useCallback(async () => {
-      const result = await addDoc(usersCollectionRef, {
-        name: name,
-        age: age,
-      });
-      //result==={converter:null, _key:,firestore:,id,...}등으로 이뤄진 객체
-      const newUser = {
-        id: result.id,
-        name: name,
-        age: Number(age),
-      };
-
-      await setUsers(users.concat(newUser));
-    }, [name, age, users]);
-
-    const getUsers = async () => {
+    const getUsers =async () => {
       const data = await getDocs(usersCollectionRef);
       //data.docs에는 doc들이 들어있다.
       data.docs.map((doc) => {
@@ -127,6 +109,22 @@ const Todo: NextPage = () => {
         setUsers((users) => [...users, result]);
       });
     };
+
+    const createUser = useCallback(async () => {
+      const result = await addDoc(usersCollectionRef, {
+        name: name,
+        age: age,
+      });
+      //result==={converter:null, _key:,firestore:,id,...}등으로 이뤄진 객체
+      const newUser = {
+        id: result.id,
+        name: name,
+        age: Number(age),
+      };
+      await setUsers(users.concat(newUser));
+    }, [name, age, users]);
+
+
 
     //**********************UPDATE sector********************************
 
