@@ -246,7 +246,6 @@ const Todo: NextPage = () => {
             <CreateUser
               name={name}
               age={age}
-              onChange={onChange}
               createUser={createUser}
             ></CreateUser>
             {/* UL */}

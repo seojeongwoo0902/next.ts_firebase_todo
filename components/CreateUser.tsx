@@ -4,7 +4,6 @@ import { UserDispatch } from "./Todo";
 type Props = {
   name: string;
   age: number;
-  onChange: any; //ChangeEventHandler<HTMLInputElement>;
   createUser(): Promise<void>;
 };
 
