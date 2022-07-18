@@ -21,6 +21,7 @@ import { db } from "../firebase-config";
 import Ul from "./Ul";
 
 import CreateUser from "./CreateUser";
+import { type } from "os";
 
 //앱존재 데이터(useState) 기반으로 서버 데이터에 반영후, 가져올땐
 
@@ -58,6 +59,7 @@ const usersCollectionRef = collection(db, "users");
 function reducer(state: any, action: any) {
   switch (action.type) {
     case "CHANGE_INPUT":
+      console.log(typeof action.value);
       return {
         ...state,
         inputs: {
@@ -66,9 +68,7 @@ function reducer(state: any, action: any) {
         },
       };
     case "GET_USER":
-      return {
-
-      };
+      return {};
 
     default:
       throw new Error("Not a type");
@@ -90,6 +90,7 @@ const Todo: NextPage = () => {
     const onChange: any = useCallback((e: any) => {
       const { name, value } = e.target;
       //디스패치에 객체로 type, name, value를 보내준다
+      console.log("이름 값: ", name, value);
       dispatch({
         type: "CHANGE_INPUT",
         name,
@@ -97,7 +98,7 @@ const Todo: NextPage = () => {
       });
     }, []);
 
-    const getUsers =async () => {
+    const getUsers = async () => {
       const data = await getDocs(usersCollectionRef);
       //data.docs에는 doc들이 들어있다.
       data.docs.map((doc) => {
@@ -122,9 +123,8 @@ const Todo: NextPage = () => {
         age: Number(age),
       };
       await setUsers(users.concat(newUser));
+      console.log(users);
     }, [name, age, users]);
-
-
 
     //**********************UPDATE sector********************************
 

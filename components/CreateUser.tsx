@@ -15,7 +15,7 @@ const CreateUser = ({ name, age, createUser }: Props) => {
         name="name"
         className="button"
         placeholder="Name..."
-        onChange={(e: any) => {
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           const { name, value } = e.target;
           dispatch({ type: "CHANGE_INPUT", name, value });
         }}
@@ -26,9 +26,11 @@ const CreateUser = ({ name, age, createUser }: Props) => {
         className="button"
         type="number"
         placeholder="Age..."
-        onChange={(e: any) => {
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           const { name, value } = e.target;
-          dispatch({ type: "CHANGE_INPUT", name, value });
+          const num_value = Number(value);
+          console.log(typeof num_value);
+          dispatch({ type: "CHANGE_INPUT", name, value: num_value });
         }}
         value={age === 0 ? "Age..." : age}
       />
